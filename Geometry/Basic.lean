@@ -20,16 +20,29 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
 #check collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi
 #check sin_pi_sub
 
-theorem angle_bisector (X : P) (hAB : A ≠ B) (hBC : B ≠ C) (hCA : C ≠ A) (h1 : ∠ B A X = ∠ X A C) (h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X := by
+theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 : ∠ B A X = ∠ X A C) (h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X := by
+  have hAB : A ≠ B := by
+    apply ne₁₂_of_not_collinear
+  have hBC : B ≠ C := by sorry
+  have hCA : C ≠ A := by sorry
   have hXB : X ≠ B := by sorry
   have hXC : X ≠ C := by sorry
   have hXA : X ≠ A := by sorry
-  have h3 : (∠ X A B).sin ≠ 0 := by sorry
+  have h3 : (∠ X A B).sin ≠ 0 := by
+    intro sineq
+    rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
+    rcases sineq with sineqa |sineqb
+    · sorry
+    sorry
   have h4 : (∠ A X B).sin ≠ 0 := by sorry
   have h5 : (∠ X A C).sin ≠ 0 := by sorry
   have h6 : (∠ A X C).sin ≠ 0 := by sorry
-  have h7 : dist X B ≠ 0 := by sorry
-  have h8 : dist X C ≠ 0 := by sorry
+  have h7 : dist X B ≠ 0 := by
+    rw [dist_ne_zero]
+    exact hXB
+  have h8 : dist X C ≠ 0 := by
+    rw [dist_ne_zero]
+    exact hXC
   calc
     dist A B / dist B X
       = sin (∠ A X B) / sin (∠ X A B) := by
