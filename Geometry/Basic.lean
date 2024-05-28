@@ -1,14 +1,20 @@
+
 import Mathlib.Geometry.Euclidean.Triangle
 
 open EuclideanGeometry
+
 open Real
 
+open FiniteDimensional
+
 variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MetricSpace P] [NormedAddTorsor V P]
+
 [Fact (finrank ℝ V = 2)] (A B C : P)
 
 #check ∠ A B C
 
 /-- Rule of sines at A and B.-/
+
 theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) : dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by sorry
 
 theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C) = dist A B / sin (∠ A C B) := by
@@ -17,23 +23,34 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   exact this
 
 #check angle_add_angle_eq_pi_of_angle_eq_pi
+
 #check collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi
+
 #check sin_pi_sub
 
 theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 : ∠ B A X = ∠ X A C) (h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X := by
-  have hAB : A ≠ B := by
-    apply ne₁₂_of_not_collinear
-  have hBC : B ≠ C := by sorry
-  have hCA : C ≠ A := by sorry
+  have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
+  have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
+  have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
+  have hCA : C ≠ A := hAC.symm
   have hXB : X ≠ B := by sorry
   have hXC : X ≠ C := by sorry
   have hXA : X ≠ A := by sorry
+  have hAXB : ∠ A X B ≠ 0 := by sorry
+  have hBXC : ∠ B X C ≠ 0 := by sorry
+  have hXAC : ∠ X A C ≠ 0 := by sorry
+  have hAXC : ∠ A X C ≠ 0 := by sorry
+  have hXAB : ∠ X A B ≠ 0 := by
+    rw[angle_comm]
+    rw[h1]
+    exact hXAC
   have h3 : (∠ X A B).sin ≠ 0 := by
     intro sineq
     rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
     rcases sineq with sineqa |sineqb
-    · sorry
-    sorry
+    · contradiction
+    · have picoll := collinear_of_angle_eq_pi sineqb
+      sorry
   have h4 : (∠ A X B).sin ≠ 0 := by sorry
   have h5 : (∠ X A C).sin ≠ 0 := by sorry
   have h6 : (∠ A X C).sin ≠ 0 := by sorry
@@ -56,8 +73,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 :
       · rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
         simp only [hXB.symm, hXC.symm, false_or] at h2
         rcases h2 with h2a | h2b
-        · exfalso
-          sorry -- Check that this is impossible
+        · contradiction
         rw [← sin_pi_sub]
         congrm sin ?_
         have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
@@ -70,9 +86,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 :
       rw [mul_comm (∠ A X C).sin]
       exact this
 
-
 theorem exists_incentre : ∃ (X : P), (∠ B A X = ∠ X A C) ∧ (∠ A C X = ∠ X C B) ∧ (∠ C B X = ∠ X B A) := by sorry
-
 -- theorem exists_incentre' :
 
 theorem morley (X Y Z : P) (hA1 : ∠ B A X = ∠ X A Z) (hA2 : ∠ X A Z = ∠ Z A C) (hB1 : ∠ A B X = ∠ X B Y) (hB2 : ∠ X B Y = ∠ Y B C) (hC1 : ∠ B C Y = ∠ Y C Z) (hC2 : ∠ Y C Z = ∠ Z C A) : dist X Y = dist Y Z ∧ dist Y Z = dist Z X := by sorry
