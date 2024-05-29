@@ -22,11 +22,6 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
-#check angle_add_angle_eq_pi_of_angle_eq_pi
-
-#check collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi
-
-#check sin_pi_sub
 
 theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 : ∠ B A X = ∠ X A C) (h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X := by
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
