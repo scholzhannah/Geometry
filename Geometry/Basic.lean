@@ -1,11 +1,9 @@
 
 import Mathlib.Geometry.Euclidean.Triangle
+import Mathlib.Geometry.Euclidean.Circumcenter
+import Mathlib.Geometry.Euclidean.Angle.Sphere
 
-open EuclideanGeometry
-
-open Real
-
-open FiniteDimensional
+open EuclideanGeometry Real FiniteDimensional AffineSubspace Affine.Simplex
 
 variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MetricSpace P] [NormedAddTorsor V P]
 
@@ -13,9 +11,56 @@ variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V
 
 #check ∠ A B C
 
-/-- Rule of sines at A and B.-/
+/-- easy to prove from Affine.Triangle.dist_div_sin_oangle_eq_two_mul_circumradius; is switching from oriented to unoriented angle-/
+theorem Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
+    (t : Affine.Triangle ℝ P) {i₁ : Fin 3} {i₂ : Fin 3} {i₃ : Fin 3}
+    (h₁₂ : i₁ ≠ i₂) (h₁₃ : i₁ ≠ i₃) (h₂₃ : i₂ ≠ i₃) :
+    dist (t.points i₁) (t.points i₃) / (angle (t.points i₁) (t.points i₂) (t.points i₃)).sin
+    = 2 * Affine.Simplex.circumradius t :=
+  sorry
 
-theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) : dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by sorry
+theorem affineIndependent_of_not_collinear_vector (hCol : ¬ Collinear ℝ ({A, B, C}: Set P)) :
+    AffineIndependent ℝ ![A, B, C] := by
+  rw [affineIndependent_iff_not_collinear_of_ne]
+  have : ({A, B, C}: Set P) = {![A, B, C] 0, ![A, B, C] 1, ![A, B, C] 2} := by aesop
+  rw [this] at hCol
+  convert hCol
+  simp
+  simp
+  simp
+
+/-- Circumcenter as a point of intersection of perpendicular bisectors of triangle-/
+theorem circumcenter_perpendicular_bisector (hCol : ¬ Collinear ℝ ({A, B, C}: Set P)) :
+    circumcenter ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
+      ∈ perpBisector A B:= by
+  have distA:= dist_circumcenter_eq_circumradius ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ 0
+  simp at distA
+  have distB:= dist_circumcenter_eq_circumradius ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ 1
+  simp at distB
+  set O := circumcenter ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
+  have distAB : dist A O = dist B O := by
+    rw[distA]
+    rw[distB]
+  exact mem_perpBisector_iff_dist_eq'.mpr distAB
+
+
+/-- Rule of sines at A and B.-/
+theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
+    dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by
+  by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
+  · sorry
+  let s := circumsphere ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
+  have h2r := Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
+    ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ (i₁ := 0) (i₂ := 1) (i₃ := 2)
+    (by simp) (by simp) (by simp)
+  simp at h2r
+  have h2r' := Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
+    ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ (i₁ := 1) (i₂ := 0) (i₃ := 2)
+    (by simp) (by simp) (by simp)
+  simp at h2r'
+  set T : Affine.Triangle ℝ P := ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
+  rw[h2r]
+  rw[h2r']
 
 theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C) = dist A B / sin (∠ A C B) := by
   have := rule_of_sines B C A hBA hCA
