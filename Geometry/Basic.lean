@@ -22,6 +22,11 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
+#check angle_add_angle_add_angle_eq_pi
+#check angle_nonneg
+#check angle_le_pi
+
+theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
 
 theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 : ∠ B A X = ∠ X A C) (h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X := by
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
@@ -31,21 +36,45 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h1 :
   have hXB : X ≠ B := by sorry
   have hXC : X ≠ C := by sorry
   have hXA : X ≠ A := by sorry
-  have hAXB : ∠ A X B ≠ 0 := by sorry
+  have hAXBpi : ∠ A X B ≠ π := by sorry
   have hBXC : ∠ B X C ≠ 0 := by sorry
-  have hXAC : ∠ X A C ≠ 0 := by sorry
+  have hBXCpi : ∠ B X C ≠ π := by sorry
   have hAXC : ∠ A X C ≠ 0 := by sorry
-  have hXAB : ∠ X A B ≠ 0 := by
+  have hAXCpi : ∠ A X C ≠ π := by sorry
+  have hXAB : ∠ X A B ≠ 0 := by sorry
+  have hXABpi : ∠ X A B ≠ π := by
+    intro XABnotpi
+    have picoll := collinear_of_angle_eq_pi XABnotpi
+    have i0 : Collinear ℝ {A, B, X, C} := by
+      have i1 : B ∈ ({B, X, C} : Set P) := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_false, true_or]
+      have i2 : X ∈ ({B, X, C} : Set P) := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_false, true_or, or_true]
+      rw [Collinear.collinear_insert_iff_of_ne h2 i1 i2 hXB.symm]
+      have i3: ({A, B, X} : Set P) = {X, A, B} := by aesop
+      rw [i3]
+      exact picoll
+    have : Collinear ℝ {A, B, C} := by
+      have : ({A, B, C} : Set P) ⊆ {A, B, X, C} := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_self, not_false_eq_true, Set.insert_subset_insert_iff,
+        Set.subset_insert]
+      apply Collinear.subset this i0
+    contradiction
+  have hXAC : ∠ X A C ≠ 0 := by
+    rw[← h1]
     rw[angle_comm]
-    rw[h1]
-    exact hXAC
+    exact hXAB
+  have hXACpi : ∠ X A C ≠ π := by
+    rw[← h1]
+    rw[angle_comm]
+    exact hXABpi
+  have hAXB : ∠ A X B ≠ 0 := by sorry
   have h3 : (∠ X A B).sin ≠ 0 := by
     intro sineq
     rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
     rcases sineq with sineqa |sineqb
     · contradiction
-    · have picoll := collinear_of_angle_eq_pi sineqb
-      sorry
+    · sorry
   have h4 : (∠ A X B).sin ≠ 0 := by sorry
   have h5 : (∠ X A C).sin ≠ 0 := by sorry
   have h6 : (∠ A X C).sin ≠ 0 := by sorry
