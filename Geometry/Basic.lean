@@ -48,7 +48,29 @@ theorem circumcenter_perpendicular_bisector (hCol : ¬ Collinear ℝ ({A, B, C}:
 theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
     dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by
   by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
-  · sorry
+  · have hCol1 : A = B ∨ C = B ∨ ∠ A B C = 0 ∨ ∠ A B C = π := by
+      rw[collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at hCol
+      exact hCol
+    have hColBC : Collinear ℝ {B, A, C} := by
+      convert hCol using 1
+      aesop
+    rw[collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at hColBC
+    obtain hAB | hCB | hang0orpi := hCol1
+    · rw[hAB]
+    · rw[hCB] at hBC
+      contradiction
+    --sorry
+    obtain  hBA | hCA| h3 := hColBC
+    · rw[hBA]
+    · rw[hCA] at hAC
+      contradiction
+    · have hangBAC0 : (∠ B A C).sin = 0 := by
+        exact sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi.mpr h3
+      have hangABC0 : (∠ A B C).sin = 0 := by
+        exact sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi.mpr hang0orpi
+      rw[hangBAC0]
+      rw[hangABC0]
+      simp
   let s := circumsphere ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
   have h2r := Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
     ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ (i₁ := 0) (i₂ := 1) (i₃ := 2)
@@ -67,13 +89,17 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
+theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
+(h1y: y ≥ 0)(h2: x + y < π)(h3: x.sin = y.sin): x=y := by sorry
+
+
 #check angle_add_angle_add_angle_eq_pi
 #check angle_nonneg
 #check angle_le_pi
 
 theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
 
-theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
+theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 : Collinear ℝ ({B, X, C} : Set P))(hbetween : Wbtw ℝ B X C) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
   have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
   have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
@@ -106,7 +132,28 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       apply Collinear.subset this i0
     contradiction
   constructor
-  · sorry
+  -- reverse direction starts here
+  · intro h
+    -- showing equality of sines
+    have H :=
+    calc
+      (∠ B A X).sin = dist B X / dist A B * (∠ A X B).sin := sorry
+      _= dist C X / dist A C * (∠ A X C).sin := sorry
+      _= (∠ X A C).sin := sorry
+    -- applying theorem that on specific interval equality of
+    -- sines implies equality of angles
+    apply injectivity_of_sines_on_interval
+    · exact angle_nonneg B A X
+    · exact angle_nonneg X A C
+    · calc
+       ∠ B A X + ∠ X A C = ∠ B A C := by
+         -- use that X is between B and C
+         sorry
+       _< π := by
+        apply angle_lt_pi_of_not_collinear
+        convert hCol using 2
+        aesop
+    · apply H
   · intro h1
     have hXAC : ∠ X A C ≠ 0 := by
       rw[← h1]
