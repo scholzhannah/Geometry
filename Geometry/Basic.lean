@@ -99,7 +99,8 @@ theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
 
 theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
 
-theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 : Collinear ℝ ({B, X, C} : Set P))(hbetween : Wbtw ℝ B X C) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
+theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbetween : Wbtw ℝ B X C) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
+  have h2 : Collinear ℝ ({B, X, C} : Set P) := Wbtw.collinear hbetween
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
   have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
   have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
@@ -107,15 +108,8 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
   have hXB : X ≠ B := by sorry
   have hXC : X ≠ C := by sorry
   have hXA : X ≠ A := by sorry
-  have hAXBpi : ∠ A X B ≠ π := by sorry
-  have hBXC : ∠ B X C ≠ 0 := by sorry
-  have hBXCpi : ∠ B X C ≠ π := by sorry
-  have hAXC : ∠ A X C ≠ 0 := by sorry
-  have hAXCpi : ∠ A X C ≠ π := by sorry
-  have hXAB : ∠ X A B ≠ 0 := by sorry
-  have hXABpi : ∠ X A B ≠ π := by
-    intro XABnotpi
-    have picoll := collinear_of_angle_eq_pi XABnotpi
+  have hXABnotcol : ¬ Collinear ℝ ({X, A, B}: Set P) := by
+    intro hXABcol
     have i0 : Collinear ℝ {A, B, X, C} := by
       have i1 : B ∈ ({B, X, C} : Set P) := by simp_all only [ne_eq, Set.mem_insert_iff,
         Set.mem_singleton_iff, or_false, true_or]
@@ -124,7 +118,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       rw [Collinear.collinear_insert_iff_of_ne h2 i1 i2 hXB.symm]
       have i3: ({A, B, X} : Set P) = {X, A, B} := by aesop
       rw [i3]
-      exact picoll
+      exact hXABcol
     have : Collinear ℝ {A, B, C} := by
       have : ({A, B, C} : Set P) ⊆ {A, B, X, C} := by simp_all only [ne_eq, Set.mem_insert_iff,
         Set.mem_singleton_iff, or_self, not_false_eq_true, Set.insert_subset_insert_iff,
@@ -132,15 +126,38 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       apply Collinear.subset this i0
     contradiction
 
-  have h3 : (∠ X A B).sin ≠ 0 := by
-    intro sineq
-    rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
-    rcases sineq with sineqa |sineqb
-    · contradiction
-    · sorry
+  have h3 : (∠ X A B).sin ≠ 0 := sorry
   have h4 : (∠ A X B).sin ≠ 0 := by sorry
   have h5 : (∠ X A C).sin ≠ 0 := by sorry
   have h6 : (∠ A X C).sin ≠ 0 := by sorry
+  have hXAB : ∠ X A B ≠ 0 := by apply angle_ne_zero_of_not_collinear hXABnotcol
+  have hXABpi : ∠ X A B ≠ π := by apply angle_ne_pi_of_not_collinear hXABnotcol
+  have hAXBnotcol : ¬ Collinear ℝ ({A, X, B}: Set P) := by
+    have : ({A, X, B} : Set P) = {X, A, B} := by aesop
+    rw[this]
+    exact hXABnotcol
+  have hAXBpi : ∠ A X B ≠ π := by apply angle_ne_pi_of_not_collinear hAXBnotcol
+  have hBXC : ∠ B X C ≠ 0 := by sorry
+  have hBXCpi : ∠ B X C ≠ π := by sorry
+  have hAXCnotcol : ¬ Collinear ℝ ({A, X, C}: Set P) := by
+    intro hAXCcol
+    have i0 : Collinear ℝ {A, B, X, C} := by
+      have i1 : C ∈ ({B, X, C} : Set P) := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_true]
+      have i2 : X ∈ ({B, X, C} : Set P) := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_false, true_or, or_true]
+      rw [Collinear.collinear_insert_iff_of_ne h2 i1 i2 hXC.symm]
+      have i3: ({A, C, X} : Set P) = {A, X, C} := by aesop
+      rw [i3]
+      exact hAXCcol
+    have : Collinear ℝ {A, B, C} := by
+      have : ({A, B, C} : Set P) ⊆ {A, B, X, C} := by simp_all only [ne_eq, Set.mem_insert_iff,
+        Set.mem_singleton_iff, or_self, not_false_eq_true, Set.insert_subset_insert_iff,
+        Set.subset_insert]
+      apply Collinear.subset this i0
+    contradiction
+  have hAXC : ∠ A X C ≠ 0 := by apply angle_ne_zero_of_not_collinear hAXCnotcol
+  have hAXCpi : ∠ A X C ≠ π := by apply angle_ne_pi_of_not_collinear hAXCnotcol
   constructor
   -- reverse direction starts here
   · intro h
@@ -221,14 +238,14 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
 
 lemma exists_bisector_point : ∃ (D : P) , (∠ B A D = ∠ D A C) ∧ (Collinear ℝ ({B, C, D} : Set P)) := by sorry
 
-lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Collinear ℝ ({A, F, B} : Set P)) := by sorry
+lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Wbtw ℝ A F B) := by sorry
 
 theorem exists_incentre (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
   by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
   · sorry
   rcases exists_bisector_point A B C with ⟨ D, hD1 , hD2 ⟩
   rcases exists_bisector_point B A C with ⟨ E, hE1 , hE2 ⟩
-  rcases exists_point_intersection_two_lines_as_needed A B C X hangleatA hangleatB with ⟨ F, hCXFcol , hAFBcol ⟩
+  rcases exists_point_intersection_two_lines_as_needed A B C X hangleatA hangleatB with ⟨ F, hCXFcol , hAFBbetween ⟩
   have hCX : dist C X ≠ 0 := sorry
   have hFX : dist F X ≠ 0 := sorry
   have hAF : dist A F ≠ 0 := sorry
@@ -243,13 +260,14 @@ theorem exists_incentre (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB :
     have : ({F, X, C} : Set P) = {C, X, F} := by aesop
     rw[this]
     exact hCXFcol
+  have hFXCbetween : (Wbtw ℝ F X C):= by sorry
   have hCABnotcol : ¬ (Collinear ℝ ({C, A, B} : Set P)) := by
     have : ({C, A, B} : Set P) = {A, B, C} := by aesop
     rw[this]
     exact hCol
-  have h1 := (angle_bisector A F C X hAFCnotcol hFXCcol).2 hangleatAshort
-  have h2 := (angle_bisector B F C X hBFCnotcol hFXCcol).2 hangleatBshort
-  have := angle_bisector C A B F hCABnotcol hAFBcol
+  have h1 := (angle_bisector A F C X hAFCnotcol hFXCbetween).2 hangleatAshort
+  have h2 := (angle_bisector B F C X hBFCnotcol hFXCbetween).2 hangleatBshort
+  have := angle_bisector C A B F hCABnotcol hAFBbetween
   rw[hangleatCAshort, hangleatCBshort, ← this]
   have h1 : dist A C / dist A F = dist C X / dist F X := by
     field_simp at h1 ⊢
