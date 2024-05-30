@@ -89,13 +89,17 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
+theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
+(h1y: y ≥ 0)(h2: x + y < π)(h3: x.sin = y.sin): x=y := by sorry
+
+
 #check angle_add_angle_add_angle_eq_pi
 #check angle_nonneg
 #check angle_le_pi
 
 theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
 
-theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 : Collinear ℝ ({B, X, C} : Set P)) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
+theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 : Collinear ℝ ({B, X, C} : Set P))(hbetween : Wbtw ℝ B X C) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
   have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
   have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
@@ -128,7 +132,19 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       apply Collinear.subset this i0
     contradiction
   constructor
-  · sorry
+  · intro h
+    have H :=
+    calc
+      (∠ B A X).sin = dist B X / dist A B * (∠ A X B).sin := sorry
+      _= dist C X / dist A C * (∠ A X C).sin := sorry
+      _= (∠ X A C).sin := sorry
+    apply injectivity_of_sines_on_interval
+    · exact angle_nonneg B A X
+    · exact angle_nonneg X A C
+    · calc
+       ∠ B A X + ∠ X A C = ∠ B A C := sorry
+       _< π := sorry
+    · apply H
   · intro h1
     have hXAC : ∠ X A C ≠ 0 := by
       rw[← h1]
