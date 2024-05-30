@@ -5,6 +5,7 @@ import Mathlib.Geometry.Euclidean.Angle.Sphere
 
 open EuclideanGeometry Real FiniteDimensional AffineSubspace Affine.Simplex
 
+/-- The sine function is injective for nonnegative angles whose sum is less than pi. -/
 theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
     (h1y: y ≥ 0)(h2: x + y < π)(h3: x.sin = y.sin): x=y := by
   wlog hxy : x ≤ y
@@ -14,12 +15,8 @@ theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
     exact this y x h1y h1x h2 h3.symm hxy.le
   have hhalf : x ≤ π / 2 := by
     linarith
-  --have hineq2 : x< π - y := by
-    --linarith
   have hineq :  y < π -x := by
     linarith
-  --by_contra h
-  --have hsin :  x.sin ≠ y.sin := by sorry
   by_cases hy : y < π / 2
   · by_contra h
     have hsinxy : x.sin < y.sin := by
@@ -59,7 +56,6 @@ variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V
 
 [Fact (finrank ℝ V = 2)] (A B C : P)
 
-#check ∠ A B C
 
 /-- easy to prove from Affine.Triangle.dist_div_sin_oangle_eq_two_mul_circumradius; is switching from oriented to unoriented angle-/
 theorem Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
@@ -69,6 +65,7 @@ theorem Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
     = 2 * Affine.Simplex.circumradius t :=
   sorry
 
+/-- If three points are not collinear then they are affine independent. -/
 theorem affineIndependent_of_not_collinear_vector (hCol : ¬ Collinear ℝ ({A, B, C}: Set P)) :
     AffineIndependent ℝ ![A, B, C] := by
   rw [affineIndependent_iff_not_collinear_of_ne]
@@ -94,7 +91,7 @@ theorem circumcenter_perpendicular_bisector (hCol : ¬ Collinear ℝ ({A, B, C}:
   exact mem_perpBisector_iff_dist_eq'.mpr distAB
 
 
-/-- Rule of sines at A and B.-/
+/-- Rule of sines at the angles at A and B.-/
 theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
     dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by
   by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
@@ -109,7 +106,6 @@ theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
     · rw[hAB]
     · rw[hCB] at hBC
       contradiction
-    --sorry
     obtain  hBA | hCA| h3 := hColBC
     · rw[hBA]
     · rw[hCA] at hAC
@@ -134,29 +130,22 @@ theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
   rw[h2r]
   rw[h2r']
 
-theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C) = dist A B / sin (∠ A C B) := by
+/-- Showing how to get the rule of sines at other angles. -/
+example (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C) = dist A B / sin (∠ A C B) := by
   have := rule_of_sines B C A hBA hCA
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
-
-
-#check angle_add_angle_add_angle_eq_pi
-#check angle_nonneg
-#check angle_le_pi
-#check sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi
-
-theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
-
+/-- Angle bisector theorem: an angle bisector of a triangle divides the opposite sides in the ratio of the two adjacent sides. -/
 theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbetween : Wbtw ℝ B X C) : dist A B / dist B X = dist A C / dist C X ↔ ∠ B A X = ∠ X A C := by
   have h2 : Collinear ℝ ({B, X, C} : Set P) := Wbtw.collinear hbetween
   have hAB : A ≠ B := ne₁₂_of_not_collinear hCol
   have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
   have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
   have hCA : C ≠ A := hAC.symm
-  have hXB : X ≠ B := by sorry
-  have hXC : X ≠ C := by sorry
-  have hXA : X ≠ A := by sorry
+  have hXB : X ≠ B := by sorry -- stupid
+  have hXC : X ≠ C := by sorry -- stupid
+  have hXA : X ≠ A := by sorry -- stupid
   --all about XAB
   have hXABnotcol : ¬ Collinear ℝ ({X, A, B}: Set P) := by
     intro hXABcol
@@ -236,8 +225,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     · contradiction
     · contradiction
  --all about BXC
-  have hBXC : ∠ B X C ≠ 0 := by sorry
-  have hBXCpi : ∠ B X C ≠ π := by sorry
+  have hBXC : ∠ B X C ≠ 0 := by sorry -- need to adapt proofs above
 
   have sineq : (∠ A X B).sin = (∠ A X C).sin := by
     rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
@@ -249,7 +237,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
     linarith
   constructor
-  -- reverse direction starts here
+  -- forwards direction starts here
   · intro h
     -- showing equality of sines
     have H :=
@@ -282,12 +270,14 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     · calc
        ∠ B A X + ∠ X A C = ∠ B A C := by
          -- use that X is between B and C
-         sorry
+         sorry -- stupid
        _< π := by
         apply angle_lt_pi_of_not_collinear
         convert hCol using 2
         aesop
     · apply H
+
+  -- backwards direction starts here
   · intro h1
     have hXAC : ∠ X A C ≠ 0 := by
       rw[← h1]
@@ -297,7 +287,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
       rw[← h1]
       rw[angle_comm]
       exact hXABpi
-    have hAXB : ∠ A X B ≠ 0 := by sorry
+    have hAXB : ∠ A X B ≠ 0 := by sorry -- stupid
     have h7 : dist X B ≠ 0 := by
       rw [dist_ne_zero]
       exact hXB
@@ -323,10 +313,16 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
         rw [mul_comm (∠ A X C).sin]
         exact this
 
+/-- Auxiliary result to be proved: the bisector of an angle of the triangle intersects the opposite
+side. -/
 lemma exists_bisector_point : ∃ (D : P) , (∠ B A D = ∠ D A C) ∧ (Collinear ℝ ({B, C, D} : Set P)) := by sorry
 
+/-- Auxilary result to be proved, stated in too specific a way: the line through one vertex of the
+triangle and the intersection of the bisectors from the other two vertices intersects the opposite
+side in between the two vertices. -/
 lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Wbtw ℝ A F B) := by sorry
 
+/-- Incentre theorem: The three angle bisectors of a nondegenerate triangle intersect at a point. -/
 theorem exists_incentre (X : P) (hnotCol: ¬ Collinear ℝ ({A, B, C} : Set P)) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
   rcases exists_bisector_point A B C with ⟨ D, hD1 , hD2 ⟩
   rcases exists_bisector_point B A C with ⟨ E, hE1 , hE2 ⟩
@@ -365,6 +361,7 @@ theorem exists_incentre (X : P) (hnotCol: ¬ Collinear ℝ ({A, B, C} : Set P)) 
     rw[mul_comm]
     exact h2
   rw[dist_comm, h1, dist_comm C B, h2]
--- theorem exists_incentre' :
 
+/-- Morley's theorem: certain intersections of angle trisectors of a triangle form an equilateral
+triangle. -/
 theorem morley (X Y Z : P) (hA1 : ∠ B A X = ∠ X A Z) (hA2 : ∠ X A Z = ∠ Z A C) (hB1 : ∠ A B X = ∠ X B Y) (hB2 : ∠ X B Y = ∠ Y B C) (hC1 : ∠ B C Y = ∠ Y C Z) (hC2 : ∠ Y C Z = ∠ Z C A) : dist X Y = dist Y Z ∧ dist Y Z = dist Z X := by sorry
