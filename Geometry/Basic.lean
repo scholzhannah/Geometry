@@ -158,6 +158,15 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     contradiction
   have hAXC : ∠ A X C ≠ 0 := by apply angle_ne_zero_of_not_collinear hAXCnotcol
   have hAXCpi : ∠ A X C ≠ π := by apply angle_ne_pi_of_not_collinear hAXCnotcol
+  have sineq : (∠ A X B).sin = (∠ A X C).sin := by
+    rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
+    simp only [hXB.symm, hXC.symm, false_or] at h2
+    rcases h2 with h2a | h2b
+    · contradiction
+    rw [← sin_pi_sub]
+    congrm sin ?_
+    have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
+    linarith
   constructor
   -- reverse direction starts here
   · intro h
@@ -172,7 +181,11 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
         rw[angle_comm B A X]
         rw[mul_comm]
         rw[hrosXAB]
-      _= dist C X / dist A C * (∠ A X C).sin := by sorry
+      _= dist C X / dist A C * (∠ A X C).sin := by
+        congrm ?_ * ?_
+        · exact (div_eq_div_iff_comm (dist A B) (dist B X) (dist A C)).mp h
+        · rw[sineq]
+
       _= (∠ X A C).sin := by
         have hrosXAC := rule_of_sines X A C hXC hAC
         have : dist A C ≠ 0 := by exact dist_ne_zero.mpr hAC
@@ -220,14 +233,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
           exact this.symm
       _ = sin (∠ A X C) / sin (∠ X A C) := by
         congrm ?_/?_
-        · rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
-          simp only [hXB.symm, hXC.symm, false_or] at h2
-          rcases h2 with h2a | h2b
-          · contradiction
-          rw [← sin_pi_sub]
-          congrm sin ?_
-          have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
-          linarith
+        · apply sineq
         · rw [angle_comm, h1]
       _ = dist A C / dist C X := by
         have := rule_of_sines A X C hCA.symm hXC
