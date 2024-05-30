@@ -96,6 +96,7 @@ theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
 #check angle_add_angle_add_angle_eq_pi
 #check angle_nonneg
 #check angle_le_pi
+#check sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi
 
 theorem angle_eq_zero_or_pi_of_angle_eq_pi (hAC: A ≠ C) (hzero : ∠ A B C = 0) : ∠ A C B = 0 ∨ ∠ A C B = π := by sorry
 
@@ -108,6 +109,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
   have hXB : X ≠ B := by sorry
   have hXC : X ≠ C := by sorry
   have hXA : X ≠ A := by sorry
+  --all about XAB
   have hXABnotcol : ¬ Collinear ℝ ({X, A, B}: Set P) := by
     intro hXABcol
     have i0 : Collinear ℝ {A, B, X, C} := by
@@ -125,20 +127,28 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
         Set.subset_insert]
       apply Collinear.subset this i0
     contradiction
-
-  have h3 : (∠ X A B).sin ≠ 0 := sorry
-  have h4 : (∠ A X B).sin ≠ 0 := by sorry
-  have h5 : (∠ X A C).sin ≠ 0 := by sorry
-  have h6 : (∠ A X C).sin ≠ 0 := by sorry
   have hXAB : ∠ X A B ≠ 0 := by apply angle_ne_zero_of_not_collinear hXABnotcol
   have hXABpi : ∠ X A B ≠ π := by apply angle_ne_pi_of_not_collinear hXABnotcol
+  have h3 : (∠ X A B).sin ≠ 0 := by
+    intro noth3
+    rw[sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi]at noth3
+    rcases noth3 with noth31 | noth32
+    · contradiction
+    · contradiction
+  -- all about AXB
   have hAXBnotcol : ¬ Collinear ℝ ({A, X, B}: Set P) := by
     have : ({A, X, B} : Set P) = {X, A, B} := by aesop
     rw[this]
     exact hXABnotcol
+  have hAXB : ∠ A X B ≠ 0 := by apply angle_ne_zero_of_not_collinear hAXBnotcol
   have hAXBpi : ∠ A X B ≠ π := by apply angle_ne_pi_of_not_collinear hAXBnotcol
-  have hBXC : ∠ B X C ≠ 0 := by sorry
-  have hBXCpi : ∠ B X C ≠ π := by sorry
+  have h4 : (∠ A X B).sin ≠ 0 := by
+    intro noth4
+    rw[sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi]at noth4
+    rcases noth4 with noth41 | noth42
+    · contradiction
+    · contradiction
+--all about AXC
   have hAXCnotcol : ¬ Collinear ℝ ({A, X, C}: Set P) := by
     intro hAXCcol
     have i0 : Collinear ℝ {A, B, X, C} := by
@@ -158,6 +168,29 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     contradiction
   have hAXC : ∠ A X C ≠ 0 := by apply angle_ne_zero_of_not_collinear hAXCnotcol
   have hAXCpi : ∠ A X C ≠ π := by apply angle_ne_pi_of_not_collinear hAXCnotcol
+  have h6 : (∠ A X C).sin ≠ 0 := by
+    intro noth6
+    rw[sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi]at noth6
+    rcases noth6 with noth61 | noth62
+    · contradiction
+    · contradiction
+-- all about XAC
+  have hXACnotcol : ¬ Collinear ℝ ({X, A, C}: Set P) := by
+    have : ({X, A, C}: Set P) = {A, X, C} := by aesop
+    rw [this]
+    exact hAXCnotcol
+  have hXAC : ∠ X A C ≠ 0 := by apply angle_ne_zero_of_not_collinear hXACnotcol
+  have hXACpi : ∠ X A C ≠ π := by apply angle_ne_pi_of_not_collinear hXACnotcol
+  have h5 : (∠ X A C).sin ≠ 0 := by
+    intro noth5
+    rw[sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi]at noth5
+    rcases noth5 with noth51 | noth52
+    · contradiction
+    · contradiction
+ --all about BXC
+  have hBXC : ∠ B X C ≠ 0 := by sorry
+  have hBXCpi : ∠ B X C ≠ π := by sorry
+
   constructor
   -- reverse direction starts here
   · intro h
@@ -240,9 +273,7 @@ lemma exists_bisector_point : ∃ (D : P) , (∠ B A D = ∠ D A C) ∧ (Colline
 
 lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Wbtw ℝ A F B) := by sorry
 
-theorem exists_incentre (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
-  by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
-  · sorry
+theorem exists_incentre (X : P) (hnotCol: ¬ Collinear ℝ ({A, B, C} : Set P)) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
   rcases exists_bisector_point A B C with ⟨ D, hD1 , hD2 ⟩
   rcases exists_bisector_point B A C with ⟨ E, hE1 , hE2 ⟩
   rcases exists_point_intersection_two_lines_as_needed A B C X hangleatA hangleatB with ⟨ F, hCXFcol , hAFBbetween ⟩
@@ -264,7 +295,7 @@ theorem exists_incentre (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB :
   have hCABnotcol : ¬ (Collinear ℝ ({C, A, B} : Set P)) := by
     have : ({C, A, B} : Set P) = {A, B, C} := by aesop
     rw[this]
-    exact hCol
+    exact hnotCol
   have h1 := (angle_bisector A F C X hAFCnotcol hFXCbetween).2 hangleatAshort
   have h2 := (angle_bisector B F C X hBFCnotcol hFXCbetween).2 hangleatBshort
   have := angle_bisector C A B F hCABnotcol hAFBbetween
