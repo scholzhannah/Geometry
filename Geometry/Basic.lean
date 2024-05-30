@@ -131,15 +131,38 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
         Set.subset_insert]
       apply Collinear.subset this i0
     contradiction
+
+  have h3 : (∠ X A B).sin ≠ 0 := by
+    intro sineq
+    rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
+    rcases sineq with sineqa |sineqb
+    · contradiction
+    · sorry
+  have h4 : (∠ A X B).sin ≠ 0 := by sorry
+  have h5 : (∠ X A C).sin ≠ 0 := by sorry
+  have h6 : (∠ A X C).sin ≠ 0 := by sorry
   constructor
   -- reverse direction starts here
   · intro h
     -- showing equality of sines
     have H :=
     calc
-      (∠ B A X).sin = dist B X / dist A B * (∠ A X B).sin := sorry
-      _= dist C X / dist A C * (∠ A X C).sin := sorry
-      _= (∠ X A C).sin := sorry
+      (∠ B A X).sin = dist B X / dist A B * (∠ A X B).sin := by
+        have hrosXAB := rule_of_sines X A B hXB hAB
+        have : dist A B ≠ 0 := by exact dist_ne_zero.mpr hAB
+        field_simp at hrosXAB ⊢
+        rw[dist_comm B X]
+        rw[angle_comm B A X]
+        rw[mul_comm]
+        rw[hrosXAB]
+      _= dist C X / dist A C * (∠ A X C).sin := by sorry
+      _= (∠ X A C).sin := by
+        have hrosXAC := rule_of_sines X A C hXC hAC
+        have : dist A C ≠ 0 := by exact dist_ne_zero.mpr hAC
+        field_simp at hrosXAC ⊢
+        rw[dist_comm C X]
+        rw[mul_comm (∠ X A C).sin]
+        rw[hrosXAC]
     -- applying theorem that on specific interval equality of
     -- sines implies equality of angles
     apply injectivity_of_sines_on_interval
@@ -164,15 +187,6 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       rw[angle_comm]
       exact hXABpi
     have hAXB : ∠ A X B ≠ 0 := by sorry
-    have h3 : (∠ X A B).sin ≠ 0 := by
-      intro sineq
-      rw [sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi] at sineq
-      rcases sineq with sineqa |sineqb
-      · contradiction
-      · sorry
-    have h4 : (∠ A X B).sin ≠ 0 := by sorry
-    have h5 : (∠ X A C).sin ≠ 0 := by sorry
-    have h6 : (∠ A X C).sin ≠ 0 := by sorry
     have h7 : dist X B ≠ 0 := by
       rw [dist_ne_zero]
       exact hXB
