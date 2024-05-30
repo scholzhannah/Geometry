@@ -132,18 +132,27 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
       apply Collinear.subset this i0
     contradiction
   constructor
+  -- reverse direction starts here
   · intro h
+    -- showing equality of sines
     have H :=
     calc
       (∠ B A X).sin = dist B X / dist A B * (∠ A X B).sin := sorry
       _= dist C X / dist A C * (∠ A X C).sin := sorry
       _= (∠ X A C).sin := sorry
+    -- applying theorem that on specific interval equality of
+    -- sines implies equality of angles
     apply injectivity_of_sines_on_interval
     · exact angle_nonneg B A X
     · exact angle_nonneg X A C
     · calc
-       ∠ B A X + ∠ X A C = ∠ B A C := sorry
-       _< π := sorry
+       ∠ B A X + ∠ X A C = ∠ B A C := by
+         -- use that X is between B and C
+         sorry
+       _< π := by
+        apply angle_lt_pi_of_not_collinear
+        convert hCol using 2
+        aesop
     · apply H
   · intro h1
     have hXAC : ∠ X A C ≠ 0 := by
