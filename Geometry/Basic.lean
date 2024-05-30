@@ -48,7 +48,29 @@ theorem circumcenter_perpendicular_bisector (hCol : ¬ Collinear ℝ ({A, B, C}:
 theorem rule_of_sines (hAC : A ≠ C) (hBC : B ≠ C) :
     dist B C / sin (∠ B A C) = dist A C / sin (∠ A B C) := by
   by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
-  · sorry
+  · have hCol1 : A = B ∨ C = B ∨ ∠ A B C = 0 ∨ ∠ A B C = π := by
+      rw[collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at hCol
+      exact hCol
+    have hColBC : Collinear ℝ {B, A, C} := by
+      convert hCol using 1
+      aesop
+    rw[collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at hColBC
+    obtain hAB | hCB | hang0orpi := hCol1
+    · rw[hAB]
+    · rw[hCB] at hBC
+      contradiction
+    --sorry
+    obtain  hBA | hCA| h3 := hColBC
+    · rw[hBA]
+    · rw[hCA] at hAC
+      contradiction
+    · have hangBAC0 : (∠ B A C).sin = 0 := by
+        exact sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi.mpr h3
+      have hangABC0 : (∠ A B C).sin = 0 := by
+        exact sin_eq_zero_iff_angle_eq_zero_or_angle_eq_pi.mpr hang0orpi
+      rw[hangBAC0]
+      rw[hangABC0]
+      simp
   let s := circumsphere ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩
   have h2r := Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
     ⟨![A, B, C], affineIndependent_of_not_collinear_vector A B C hCol⟩ (i₁ := 0) (i₂ := 1) (i₃ := 2)
