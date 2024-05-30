@@ -158,7 +158,49 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(h2 :
         rw [mul_comm (∠ A X C).sin]
         exact this
 
-theorem exists_incentre : ∃ (X : P), (∠ B A X = ∠ X A C) ∧ (∠ A C X = ∠ X C B) ∧ (∠ C B X = ∠ X B A) := by sorry
+lemma exists_bisector_point : ∃ (D : P) , (∠ B A D = ∠ D A C) ∧ (Collinear ℝ ({B, C, D} : Set P)) := by sorry
+
+lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Collinear ℝ ({A, F, B} : Set P)) := by sorry
+
+theorem exists_incentre (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
+  by_cases hCol : Collinear ℝ ({A, B, C}: Set P)
+  · sorry
+  rcases exists_bisector_point A B C with ⟨ D, hD1 , hD2 ⟩
+  rcases exists_bisector_point B A C with ⟨ E, hE1 , hE2 ⟩
+  rcases exists_point_intersection_two_lines_as_needed A B C X hangleatA hangleatB with ⟨ F, hCXFcol , hAFBcol ⟩
+  have hCX : dist C X ≠ 0 := sorry
+  have hFX : dist F X ≠ 0 := sorry
+  have hAF : dist A F ≠ 0 := sorry
+  have hBF : dist B F ≠ 0 := sorry
+  have hangleatAshort : ∠ F A X = ∠ X A C := sorry
+  have hangleatBshort : ∠ F B X = ∠ X B C := sorry
+  have hangleatCAshort: ∠ A C X = ∠ A C F := sorry
+  have hangleatCBshort: ∠ X C B = ∠ F C B := sorry
+  have hAFCnotcol : ¬ (Collinear ℝ ({A, F, C} : Set P)) := sorry
+  have hBFCnotcol : ¬ (Collinear ℝ ({B, F, C} : Set P)) := sorry
+  have hFXCcol : (Collinear ℝ ({F, X, C} : Set P)) := by
+    have : ({F, X, C} : Set P) = {C, X, F} := by aesop
+    rw[this]
+    exact hCXFcol
+  have hCABnotcol : ¬ (Collinear ℝ ({C, A, B} : Set P)) := by
+    have : ({C, A, B} : Set P) = {A, B, C} := by aesop
+    rw[this]
+    exact hCol
+  have h1 := (angle_bisector A F C X hAFCnotcol hFXCcol).2 hangleatAshort
+  have h2 := (angle_bisector B F C X hBFCnotcol hFXCcol).2 hangleatBshort
+  have := angle_bisector C A B F hCABnotcol hAFBcol
+  rw[hangleatCAshort, hangleatCBshort, ← this]
+  have h1 : dist A C / dist A F = dist C X / dist F X := by
+    field_simp at h1 ⊢
+    symm
+    rw[mul_comm]
+    exact h1
+  have h2 : dist B C / dist B F = dist C X / dist F X := by
+    field_simp at h2 ⊢
+    symm
+    rw[mul_comm]
+    exact h2
+  rw[dist_comm, h1, dist_comm C B, h2]
 -- theorem exists_incentre' :
 
 theorem morley (X Y Z : P) (hA1 : ∠ B A X = ∠ X A Z) (hA2 : ∠ X A Z = ∠ Z A C) (hB1 : ∠ A B X = ∠ X B Y) (hB2 : ∠ X B Y = ∠ Y B C) (hC1 : ∠ B C Y = ∠ Y C Z) (hC2 : ∠ Y C Z = ∠ Z C A) : dist X Y = dist Y Z ∧ dist Y Z = dist Z X := by sorry
