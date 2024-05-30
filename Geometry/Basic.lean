@@ -5,6 +5,56 @@ import Mathlib.Geometry.Euclidean.Angle.Sphere
 
 open EuclideanGeometry Real FiniteDimensional AffineSubspace Affine.Simplex
 
+theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
+    (h1y: y ≥ 0)(h2: x + y < π)(h3: x.sin = y.sin): x=y := by
+  wlog hxy : x ≤ y
+  · rw [add_comm] at h2
+    push_neg at hxy
+    symm
+    exact this y x h1y h1x h2 h3.symm hxy.le
+  have hhalf : x ≤ π / 2 := by
+    linarith
+  --have hineq2 : x< π - y := by
+    --linarith
+  have hineq :  y < π -x := by
+    linarith
+  --by_contra h
+  --have hsin :  x.sin ≠ y.sin := by sorry
+  by_cases hy : y < π / 2
+  · by_contra h
+    have hsinxy : x.sin < y.sin := by
+      apply Real.strictMonoOn_sin
+      · simp
+        constructor
+        · linarith
+        · exact hhalf
+      · simp
+        constructor
+        · linarith
+        · exact hy.le
+      push_neg at h
+      exact lt_of_le_of_ne hxy h
+    have := hsinxy.ne
+    contradiction
+  · push_neg at hy
+    by_contra h
+    rw [← sin_pi_sub y] at h3
+    have hsinyx : x.sin < (π  - y).sin := by
+      apply Real.strictMonoOn_sin
+      · simp
+        constructor
+        · linarith
+        · exact hhalf
+      · simp
+        constructor
+        · linarith
+        · linarith
+      linarith
+    have := hsinyx.ne
+    contradiction
+
+
+
 variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MetricSpace P] [NormedAddTorsor V P]
 
 [Fact (finrank ℝ V = 2)] (A B C : P)
@@ -89,8 +139,6 @@ theorem rule_of_sines' (hBA: B ≠ A) (hCA : C ≠ A): dist A C / sin (∠ A B C
   rw [dist_comm, dist_comm A, angle_comm, angle_comm A]
   exact this
 
-theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
-(h1y: y ≥ 0)(h2: x + y < π)(h3: x.sin = y.sin): x=y := by sorry
 
 
 #check angle_add_angle_add_angle_eq_pi
@@ -191,6 +239,15 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
   have hBXC : ∠ B X C ≠ 0 := by sorry
   have hBXCpi : ∠ B X C ≠ π := by sorry
 
+  have sineq : (∠ A X B).sin = (∠ A X C).sin := by
+    rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
+    simp only [hXB.symm, hXC.symm, false_or] at h2
+    rcases h2 with h2a | h2b
+    · contradiction
+    rw [← sin_pi_sub]
+    congrm sin ?_
+    have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
+    linarith
   constructor
   -- reverse direction starts here
   · intro h
@@ -205,7 +262,11 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
         rw[angle_comm B A X]
         rw[mul_comm]
         rw[hrosXAB]
-      _= dist C X / dist A C * (∠ A X C).sin := by sorry
+      _= dist C X / dist A C * (∠ A X C).sin := by
+        congrm ?_ * ?_
+        · exact (div_eq_div_iff_comm (dist A B) (dist B X) (dist A C)).mp h
+        · rw[sineq]
+
       _= (∠ X A C).sin := by
         have hrosXAC := rule_of_sines X A C hXC hAC
         have : dist A C ≠ 0 := by exact dist_ne_zero.mpr hAC
@@ -253,14 +314,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
           exact this.symm
       _ = sin (∠ A X C) / sin (∠ X A C) := by
         congrm ?_/?_
-        · rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
-          simp only [hXB.symm, hXC.symm, false_or] at h2
-          rcases h2 with h2a | h2b
-          · contradiction
-          rw [← sin_pi_sub]
-          congrm sin ?_
-          have := angle_add_angle_eq_pi_of_angle_eq_pi A h2b
-          linarith
+        · apply sineq
         · rw [angle_comm, h1]
       _ = dist A C / dist C X := by
         have := rule_of_sines A X C hCA.symm hXC
