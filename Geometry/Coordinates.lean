@@ -7,9 +7,7 @@ open RealInnerProductSpace
 
 variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] {x y : V}
 
-/-- The undirected angle between two vectors. If either vector is 0,
-this is π/2. See `Orientation.oangle` for the corresponding oriented angle
-definition. -/
+/-- Angles are equal if the underlying algebraic expressions are. -/
 theorem angle_eq_angle_of_squares (x y z w : V)
     (h : ⟪x, y⟫^2 / (⟪x, x⟫ * ⟪y, y⟫) = ⟪z, w⟫^2 / (⟪z, z⟫ * ⟪w, w⟫)) :
     angle x y = angle z w :=
