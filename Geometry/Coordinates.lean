@@ -34,8 +34,11 @@ example : angle (incentre x y z - x) (y - x) = angle (incentre x y z - x) (z - x
           (dist y z * x 1 + dist z x * y 1 + dist x y * z 1 - (dist y z + dist z x + dist x y) * x 1) *
             (dist y z * x 1 + dist z x * y 1 + dist x y * z 1 - (dist y z + dist z x + dist x y) * x 1) ≠ 0 := sorry
   have : perimeter x y z ≠ 0 := sorry
+  have hxy : dist x y ^ 2 = ⟪x - y, x - y⟫ := by rw [dist_eq_norm, real_inner_self_eq_norm_sq]
+  have hyz : dist y z ^ 2 = ⟪y - z, y - z⟫ := by rw [dist_eq_norm, real_inner_self_eq_norm_sq]
+  have hzx : dist z x ^ 2 = ⟪z - x, z - x⟫ := by rw [dist_eq_norm, real_inner_self_eq_norm_sq]
   dsimp [incentre, perimeter, angle, -ne_eq] at *
   simp only [map_sub, map_add, map_mul, map_div₀, conj_trivial, Fin.sum_univ_two, dist_comm] at *
   field_simp
-  -- ring
+  -- polyrith
   sorry
