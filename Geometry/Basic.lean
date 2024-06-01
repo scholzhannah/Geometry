@@ -2,6 +2,8 @@
 import Mathlib.Geometry.Euclidean.Triangle
 import Mathlib.Geometry.Euclidean.Circumcenter
 import Mathlib.Geometry.Euclidean.Angle.Sphere
+import Mathlib.Geometry.Euclidean.Angle.Oriented.Affine
+import Mathlib.Data.Real.Sign
 
 open EuclideanGeometry Real FiniteDimensional AffineSubspace Affine.Simplex
 
@@ -55,7 +57,34 @@ theorem injectivity_of_sines_on_interval (x y : ℝ) (h1x: x ≥ 0)
 variable {V : Type*} {P : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MetricSpace P] [NormedAddTorsor V P]
 
 [Fact (finrank ℝ V = 2)] (A B C : P)
+[Module.Oriented ℝ V (Fin 2)]
 
+#check oangle_add
+#check Wbtw.oangle_sign_eq_of_ne_right
+#check oangle_eq_angle_of_sign_eq_one
+#check oangle_eq_neg_angle_of_sign_eq_neg_one
+
+theorem angle_add_of_wbtw (X : P) (between : Wbtw ℝ A B C) (hAX : A ≠ X) (hBX : B ≠ X) (hCX: C ≠ X) : ∠ A X B + ∠ B X C = ∠ A X C := by
+  by_cases hBC : B = C
+  · rw [hBC, angle_self_of_ne hCX, add_zero]
+  by_cases hBA : B = A
+  · rw [hBA, angle_self_of_ne hAX, zero_add]
+  push_neg at hBC hBA
+  have signeq := Wbtw.oangle_sign_eq_of_ne_right X between hBC
+  rw [wbtw_comm] at between
+  have signeq' := Wbtw.oangle_sign_eq_of_ne_right X between hBA
+  rw [← oangle_swap₁₃_sign, ← oangle_swap₁₃_sign A, neg_inj] at signeq'
+  by_cases hsign : (∡ A X B).sign = 1
+  · have hsign' : (∡ B X C ).sign = 1 := by rw [signeq, ← signeq', hsign]
+    have hsign'' : (∡ A X C ).sign = 1 := by rw [← signeq', hsign]
+    have := oangle_add hAX hBX hCX
+    rw [oangle_eq_angle_of_sign_eq_one hsign, oangle_eq_angle_of_sign_eq_one hsign', oangle_eq_angle_of_sign_eq_one hsign'', ← Angle.coe_add] at this
+    sorry -- work with quotient, need to show that sum ≤ π
+  · push_neg at hsign
+    unfold Angle.sign at hsign
+    unfold SignType.sign at hsign
+    simp at hsign
+    sorry --do basically the same as above
 
 /-- easy to prove from Affine.Triangle.dist_div_sin_oangle_eq_two_mul_circumradius; is switching from oriented to unoriented angle-/
 theorem Affine.Triangle.dist_div_sin_angle_eq_two_mul_circumradius
@@ -143,9 +172,13 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
   have hBC : B ≠ C := ne₂₃_of_not_collinear hCol
   have hAC : A ≠ C := ne₁₃_of_not_collinear hCol
   have hCA : C ≠ A := hAC.symm
+  -- the proofs of these depend on the direction of the proof, need to restructure this section
   have hXB : X ≠ B := by sorry -- stupid
   have hXC : X ≠ C := by sorry -- stupid
   have hXA : X ≠ A := by sorry -- stupid
+  have hsbetween: Sbtw ℝ B X C := by
+    unfold Sbtw
+    exact ⟨hbetween, hXB, hXC⟩
   --all about XAB
   have hXABnotcol : ¬ Collinear ℝ ({X, A, B}: Set P) := by
     intro hXABcol
@@ -225,8 +258,10 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     · contradiction
     · contradiction
  --all about BXC
-  have hBXC : ∠ B X C ≠ 0 := by sorry -- need to adapt proofs above
-
+  have hBXC : ∠ B X C ≠ 0 := by
+    have := Sbtw.angle₁₂₃_eq_pi hsbetween
+    rw [this]
+    exact pi_ne_zero
   have sineq : (∠ A X B).sin = (∠ A X C).sin := by
     rw [collinear_iff_eq_or_eq_or_angle_eq_zero_or_angle_eq_pi] at h2
     simp only [hXB.symm, hXC.symm, false_or] at h2
@@ -269,8 +304,7 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
     · exact angle_nonneg X A C
     · calc
        ∠ B A X + ∠ X A C = ∠ B A C := by
-         -- use that X is between B and C
-         sorry -- stupid
+        exact angle_add_of_wbtw B X C A hbetween hAB.symm hXA hCA
        _< π := by
         apply angle_lt_pi_of_not_collinear
         convert hCol using 2
@@ -287,7 +321,6 @@ theorem angle_bisector (X : P) (hCol : ¬ Collinear ℝ ({A, B, C}: Set P))(hbet
       rw[← h1]
       rw[angle_comm]
       exact hXABpi
-    have hAXB : ∠ A X B ≠ 0 := by sorry -- stupid
     have h7 : dist X B ≠ 0 := by
       rw [dist_ne_zero]
       exact hXB
@@ -322,14 +355,57 @@ triangle and the intersection of the bisectors from the other two vertices inter
 side in between the two vertices. -/
 lemma exists_point_intersection_two_lines_as_needed (X : P) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∃ (F :P) , (Collinear ℝ ({C, X, F} : Set P)) ∧ (Wbtw ℝ A F B) := by sorry
 
+#check angle_eq_left
+
 /-- Incentre theorem: The three angle bisectors of a nondegenerate triangle intersect at a point. -/
 theorem exists_incentre (X : P) (hnotCol: ¬ Collinear ℝ ({A, B, C} : Set P)) (hangleatA : ∠ B A X = ∠ X A C) (hangleatB : ∠ A B X = ∠ X B C) : ∠ A C X = ∠ X C B := by
   rcases exists_bisector_point A B C with ⟨ D, hD1 , hD2 ⟩
   rcases exists_bisector_point B A C with ⟨ E, hE1 , hE2 ⟩
   rcases exists_point_intersection_two_lines_as_needed A B C X hangleatA hangleatB with ⟨ F, hCXFcol , hAFBbetween ⟩
-  have hCX : dist C X ≠ 0 := sorry
-  have hFX : dist F X ≠ 0 := sorry
-  have hAF : dist A F ≠ 0 := sorry
+  have hAB := ne₁₂_of_not_collinear hnotCol
+  have nsbtwABX : ¬ Sbtw ℝ A B X := by sorry
+  have nsbtwAXB : ¬ Sbtw ℝ A X B := by sorry
+  have hCX : dist C X ≠ 0 := by
+    rw [dist_ne_zero]
+    intro XeqC
+    have : X ≠ A := by
+      intro XeqA
+      have : Collinear ℝ {A, B, C} := by
+        rw [XeqC, XeqA.symm]
+        have : ({X, B, X} : Set P) = {B, X} := by simp only [Set.mem_insert_iff,
+          Set.mem_singleton_iff, or_true, Set.insert_eq_of_mem]
+        rw [this]
+        exact collinear_pair ℝ B X
+      contradiction
+    have : ∠ X A C = 0 := by
+      rw [XeqC]
+      exact angle_self_of_ne this
+    rw [← hangleatA, angle_eq_zero_iff_eq_and_ne_or_sbtw] at this
+    rcases this with BeqX | hABX | hAXB
+    · have : Collinear ℝ {A, B, C} := by
+        rw [XeqC, BeqX.1]
+        have : ({A, X, X} : Set P) = {A, X} := by simp only [Set.mem_singleton_iff,
+          Set.insert_eq_of_mem]
+        rw [this]
+        exact collinear_pair ℝ A X
+      contradiction
+    · contradiction
+    · contradiction
+  have hFX : dist F X ≠ 0 := by
+    rw [dist_ne_zero]
+    intro FeqX
+    rw [FeqX] at hAFBbetween
+    unfold Sbtw at nsbtwAXB
+    simp only [hAFBbetween, ne_eq, true_and, not_and_or, not_not] at nsbtwAXB
+    rcases nsbtwAXB with XeqA | XeqB
+    · rw [XeqA, angle_self_of_ne hAB] at hangleatB
+      exact hnotCol (collinear_of_angle_eq_zero hangleatB.symm)
+    · rw [XeqB, angle_self_of_ne hAB.symm] at hangleatA
+      have col := collinear_of_angle_eq_zero hangleatA.symm
+      have : ({B, A, C} : Set P) = {A, B, C} := by aesop
+      rw [this] at col
+      contradiction
+  have hAF : dist A F ≠ 0 := sorry --these should hopefully work similarly
   have hBF : dist B F ≠ 0 := sorry
   have hangleatAshort : ∠ F A X = ∠ X A C := sorry
   have hangleatBshort : ∠ F B X = ∠ X B C := sorry
